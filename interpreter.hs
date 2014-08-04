@@ -25,7 +25,19 @@ runName e n stack = case n of
   "swap" -> swap stack
   "rot" -> rot stack
   "dip" -> dip stack
-  s -> error $ "User-defined functions are unimplemented! " ++ s
+  "+" -> add stack
+  -- "-" -> sub stack
+  -- "*" -> mul stack
+  -- "/" -> divide stack
+  s -> case Map.lookup s e of
+    Nothing -> error $ "Undefined name: " ++ s
+    Just v -> case v of
+      Block b -> runBlock e b stack
+      literal -> literal:stack
+
+runBlock :: Env -> [Value] -> [Value] -> [Value]
+runBlock e [] stack = stack
+runBlock e (v:vs) stack = runBlock e vs (runValue e v stack)
 
 underflow = error "Stack underflow!"
 
@@ -40,3 +52,15 @@ rot _ = underflow
 
 dip (a:b:c:xs) = c:a:b:xs
 dip _ = underflow
+
+add (a:b:xs) = s:xs where
+  s = case (a, b) of
+    (Int i, Int j) -> Int $ i + j
+    (Float i, Float j) -> Float $ i + j
+    (Float i, Int j) -> Float $ i + fromIntegral j
+    (Int i, Float j) -> Float $ j + fromIntegral i
+    (i, j) -> error $
+      "Can only add intergral types, not " ++
+      show i ++
+      " and " ++
+      show j
