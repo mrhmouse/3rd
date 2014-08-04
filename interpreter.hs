@@ -26,9 +26,9 @@ runName e n stack = case n of
   "rot" -> rot stack
   "dip" -> dip stack
   "+" -> add stack
-  -- "-" -> sub stack
-  -- "*" -> mul stack
-  -- "/" -> divide stack
+  "-" -> sub stack
+  "*" -> mul stack
+  "/" -> divide stack
   s -> case Map.lookup s e of
     Nothing -> error $ "Undefined name: " ++ s
     Just v -> case v of
@@ -60,7 +60,39 @@ add (a:b:xs) = s:xs where
     (Float i, Int j) -> Float $ i + fromIntegral j
     (Int i, Float j) -> Float $ j + fromIntegral i
     (i, j) -> error $
-      "Can only add intergral types, not " ++
-      show i ++
-      " and " ++
-      show j
+      "Can only add numeric types, not " ++
+      show i ++ " and " ++ show j
+add _ = underflow
+
+sub (a:b:xs) = s:xs where
+  s = case (a, b) of
+    (Int i, Int j) -> Int $ j - i
+    (Float i, Float j) -> Float $ j - i
+    (Float i, Int j) -> Float $ (fromIntegral j) - i
+    (Int i, Float j) -> Float $ (fromIntegral i) - j
+    (i, j) -> error $
+      "Can only subtract numeric types, not " ++
+      show i ++ " and " ++ show j
+sub _ = underflow
+
+mul (a:b:xs) = s:xs where
+  s = case (a, b) of
+    (Int i, Int j) -> Int $ j * i
+    (Float i, Float j) -> Float $ j * i
+    (Float i, Int j) -> Float $ (fromIntegral j) * i
+    (Int i, Float j) -> Float $ (fromIntegral i) * j
+    (i, j) -> error $
+      "Can only multiply numeric types, not " ++
+      show i ++ " and " ++ show j
+mul _ = underflow
+
+divide (a:b:xs) = s:xs where
+  s = case (a, b) of
+    (Int i, Int j) -> Float $ (fromIntegral j) / (fromIntegral i)
+    (Float i, Float j) -> Float $ j / i
+    (Float i, Int j) -> Float $ (fromIntegral j) / i
+    (Int i, Float j) -> Float $ (fromIntegral i) / j
+    (i, j) -> error $
+      "Can only divide numeric types, not " ++
+      show i ++ " and " ++ show j
+divide _ = underflow
