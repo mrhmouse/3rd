@@ -8,7 +8,7 @@ type State = (Env, [Value])
 interpret :: Env -> [Statement] -> State
 interpret e [] = (e, [])
 interpret e stmts = i e stmts [] where
-  i e [] stack = (e, stack)
+  i e [] stack = (e, reverse stack)
   i e (s:rest) stack = case s of
     Definition n v -> i (Map.insert n v e) rest stack
     Value v        -> i e rest (runValue e v stack)
