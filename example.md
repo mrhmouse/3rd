@@ -80,12 +80,12 @@ List, string, and block manipulation
 - length  : return the length of the top list in the stack
     (1 2 3) length --> 3
 - pluck   : return the nth item in a list, pulling it out
-    (1 2 3 4 5) 3 pluck --> (1 2 3 5) 4    # TODO
+    (1 2 3 4 5) 3 pluck --> (1 2 3 5) 4
 - insert  : insert an item into the nth position in a list
-    (1 2 3 5) 4 3 insert --> (1 2 3 4 5)  # TODO
+    (1 2 3 5) 4 3 insert --> (1 2 3 4 5)
 
 Conversion functions
 ====================
 
 - string  : convert an item to a string
-    4.5 string --> "4.5"                                     # TODO
+    4.5 string --> "4.5" # TODO

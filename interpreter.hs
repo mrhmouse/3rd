@@ -47,6 +47,8 @@ runName e n stack = case n of
   "cat" -> cat stack
   "empty" -> empty stack
   "length" -> valLength stack
+  "pluck" -> pluck stack
+  "insert" -> insert stack
   s -> case Map.lookup s e of
     Nothing -> error $ "Undefined name: " ++ s
     Just v -> case v of
@@ -189,3 +191,40 @@ valLength (String a:rest) = return $ Int (fromIntegral $ length a):rest
 valLength (Block a:rest) = return $ Int (fromIntegral $ length a):rest
 valLength (a:rest) = error $ "Expected a list, but got " ++ show a
 valLength _ = underflow
+
+except :: [a] -> Int -> [a]
+except lst n = h ++ t where
+  h = take n lst
+  t = drop (n + 1) lst
+
+pluck (Int n':lst:rest) = return $ nth:lst':rest where
+  n = fromIntegral n'
+  items = case lst of
+    List items -> items
+    Block items -> items
+    String chars -> map (String . show) chars
+  nth = case items !! n of
+    Name n -> Block [Name n]
+    lit -> lit
+  lst' = case lst of
+    List xs -> List $ xs `except` n
+    Block xs -> Block $ xs `except` n
+    String xs -> String $ xs `except` n
+pluck (a:_:_) = error $ "Execpted integer, but got: " ++ show a
+pluck _ = underflow
+
+insert (Int n':a:String str:rest) = return $ lst':rest where
+  n = fromIntegral n'
+  (h, t) = n `splitAt` str
+  lst' = String $ h ++ printValue a ++ t
+insert (Int n':a:List lst:rest) = return $ lst':rest where
+  n = fromIntegral n'
+  (h, t) = n `splitAt` lst
+  lst' = List $ h ++ [a] ++ t
+insert (Int n':a:Block lst:rest) = return $ lst':rest where
+  n = fromIntegral n'
+  (h, t) = n `splitAt` lst
+  lst' = Block $ h ++ [a] ++ t
+insert (Int _:_:a:_) = error $ "Expected list type, but got: " ++ show a
+insert (a:_:_:_) = error $ "Expected integer, but got: " ++ show a
+insert _ = underflow
