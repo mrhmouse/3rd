@@ -25,7 +25,7 @@ alpha :: Char -> Bool
 alpha c = c `elem` ['a'..'z'] || c `elem` ['A'..'Z']
 
 symbol :: Char -> Bool
-symbol c = c `elem` "~!@$%^&*_+-=<>,.{}\\/`'"
+symbol c = c `elem` "?~!@$%^&*_+-=<>,.{}\\/`'"
 
 digit :: Char -> Bool
 digit c = c `elem` ['0'..'9']
@@ -42,7 +42,7 @@ readDefinition :: String -> (String, Statement)
 readDefinition s = go (s', []) where
   (s', Name n) = readName (dropWhile whitespace s)
   done = Definition n . Block . reverse
-  go ([], vs) = ([], done vs)
+  go ([], vs) = error "Incomplete definition! Expected ';'"
   go (';':s, vs) = (s, done vs)
   go (s, vs) = case readValue s of
     (r, Nothing) -> go (r, vs)
@@ -88,7 +88,7 @@ readNumber s = go (s, []) where
 readBlock :: ParseStep
 readBlock s = go (s, []) where
   done = Block . reverse
-  go ([], vs) = ([], done vs)
+  go ([], vs) = error "Incomplete block! Expected ']'"
   go (c:s, vs) =
     if c == ']'
     then (s, done vs)
@@ -99,7 +99,7 @@ readBlock s = go (s, []) where
 readList :: ParseStep
 readList s = go (s, []) where
   done = List . reverse
-  go ([], vs) = ([], done vs)
+  go ([], vs) = error "Incomplete list! Expected ')'"
   go (c:s, vs) =
     if c == ')'
     then (s, done vs)
@@ -110,7 +110,7 @@ readList s = go (s, []) where
 readString :: ParseStep
 readString s = go (s, []) where
   done = String . reverse
-  go ([], vs) = ([], done vs)
+  go ([], vs) = error "Incomplete string! Expected '\"'"
   go ('"':s, vs) = (s, done vs)
   go ('\\':'"':s, vs) = go (s, "\"" ++ vs)
   go ('\\':'n':s, vs) = go (s, "\n" ++ vs)

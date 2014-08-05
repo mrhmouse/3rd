@@ -1,6 +1,7 @@
 module Interpreter where
 import qualified Data.Map.Lazy as Map
 import Parser
+import Control.Monad
 
 type Env = Map.Map Name Value
 type State = (Env, [Value])
@@ -142,35 +143,49 @@ printVal (v:rest) = do
   putStr $ printValue v
   return rest
 
+joinSpaces :: [String] -> String
+joinSpaces strs = foldl f "" strs where f a b = a ++ " " ++ b
+
 printValue :: Value -> String
 printValue v = case v of
   Bool v -> show v
   Int v -> show v
   String v -> v
   Float v -> show v
-  List v -> show $ map printValue v
-  Block v -> "#block" ++ (show $ map printValue v)
-  Name v -> "#ref<" ++ v ++ ">"
+  List v -> "(" ++ joinSpaces (map printValue v) ++ ")"
+  Block v -> "[" ++ joinSpaces (map printValue v) ++ "]"
+  Name v -> v
 
-pop (List lst:rest) = return $ h:t:rest where
-  h = head lst
-  t = List $ tail lst
-pop (a:rest) = error $ "Expected list, but got " ++ show a
+pop (lst:rest) = return $ h:t:rest where
+  (construct, items) = case lst of
+    List items -> (List, items)
+    String items -> (String . join . map printValue, map (String . show) items)
+    Block items -> (Block, items)
+    _ -> error $ "Expected list, but got " ++ show lst
+  h = head items
+  t = construct $ tail items
 pop _ = underflow
 
 cat (List a:List b:rest) = return $ (List $ a++b):rest
+cat (Block a:Block b:rest) = return $ (Block $ a++b):rest
 cat (String a:String b:rest) = return $ (String $ a++b):rest
 cat (a:b:rest) = error $ "Expected two lists or two strings, but got " ++ show a ++ " and " ++ show b
 cat _ = underflow
 
 push (a:List b:rest) = return $ (List $ a:b):rest
+push (a:Block b:rest) = return $ (Block $ a:b):rest
+push (a:String b:rest) = return $ (String $ printValue a ++ b):rest
 push (_:b:rest) = error $ "Expected a list, but got " ++ show b
 push _ = underflow
 
 empty (List a:rest) = return $ Bool (null a):rest
+empty (String a:rest) = return $ Bool (null a):rest
+empty (Block a:rest) = return $ Bool (null a):rest
 empty (a:rest) = error $ "Expected a list, but got " ++ show a
 empty _ = underflow
 
 valLength (List a:rest) = return $ Int (fromIntegral $ length a):rest
+valLength (String a:rest) = return $ Int (fromIntegral $ length a):rest
+valLength (Block a:rest) = return $ Int (fromIntegral $ length a):rest
 valLength (a:rest) = error $ "Expected a list, but got " ++ show a
 valLength _ = underflow
