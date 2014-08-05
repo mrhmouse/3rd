@@ -8,6 +8,10 @@
 : p . NL ;
 : show dup p ;
 : neg dup 2 * - ;
+: each [drop2]
+       [dup dip pop dip call swap each]
+       [swap dup empty dip swap]
+       if ;
 : while
   # Call the condition
   dup2 swap call dip swap
@@ -23,8 +27,11 @@
   # the condition earlier
   [] if
 ;
+: iota () swap <iota> ;
+: <iota> [drop] [dup dip swap push swap 1 - <iota>] [dup 0 =] if ;
 
 # Count down from 5
-[1 - show] [0 <] 5 while drop
+(5 4 3 2 1) [. NL] each
 
-50 neg p
+# Count up to 50
+50 iota ["Now we're at: " . . NL] each
