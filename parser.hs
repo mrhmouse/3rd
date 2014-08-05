@@ -8,9 +8,10 @@ data Value
   | Int Integer
   | Float Float
   | String String
+  | Bool Bool
   | Block [Value]
   | List [Value]
-  deriving Show
+  deriving (Show, Eq, Ord)
 
 data Statement
   = Value Value
@@ -64,10 +65,13 @@ readValue s = go s where
 
 readName :: ParseStep
 readName s = go (s, []) where
-  done = Name . reverse
+  done s = case reverse s of
+    "true"  -> Bool True
+    "false" -> Bool False
+    n       -> Name n
   go ([], n) = ([], done n)
   go (c:s, n)
-    | alpha c || symbol c = go (s, c:n)
+    | alpha c || symbol c || digit c = go (s, c:n)
     | otherwise           = (c:s, done n)
 
 readNumber :: ParseStep

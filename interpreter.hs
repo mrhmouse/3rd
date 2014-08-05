@@ -18,6 +18,7 @@ runValue e v stack = case v of
   Name n  -> runName e n stack
   literal -> literal:stack
 
+-- This is where builtin functions live.
 runName :: Env -> Name -> [Value] -> [Value]
 runName e n stack = case n of
   "dup" -> dup stack
@@ -29,6 +30,14 @@ runName e n stack = case n of
   "-" -> sub stack
   "*" -> mul stack
   "/" -> divide stack
+  "if" -> conditional e stack
+  "=" -> equals stack
+  ">" -> greaterThan stack
+  "<" -> lessThan stack
+  "!" -> inverse stack
+  "call" -> runBlock e block rest where
+    (Block block) = head stack
+    rest = drop 1 stack
   s -> case Map.lookup s e of
     Nothing -> error $ "Undefined name: " ++ s
     Just v -> case v of
@@ -96,3 +105,25 @@ divide (a:b:xs) = s:xs where
       "Can only divide numeric types, not " ++
       show i ++ " and " ++ show j
 divide _ = underflow
+
+conditional e (Block b:Block false:Block true:stack) = runBlock e choice rest where
+  (choice, rest) = case runBlock e b stack of
+    Bool True:rest -> (true, rest)
+    Bool False:rest -> (false, rest)
+    b:_ -> error $ "Expected boolean, got: " ++ show b
+    _ -> underflow
+
+conditional _ _ = underflow
+
+equals (a:b:stack) = result:stack where result = Bool $ a == b
+equals _ = underflow
+
+greaterThan (a:b:stack) = result:stack where result = Bool $ a > b
+greaterThan _ = underflow
+
+lessThan (a:b:stack) = result:stack where result = Bool $ a < b
+lessThan _ = underflow
+
+inverse (Bool a:stack) = result:stack where result = Bool $ not a
+inverse (a:stack) = error $ "Expected a boolean, but got " ++ show a
+inverse _ = underflow
