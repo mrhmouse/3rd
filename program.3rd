@@ -1,0 +1,30 @@
+: dup2 dup dip dup rot swap ;
+: dip2 dip dip;
+: when [] swap if ;
+: unless [] dip2 if ;
+: drop2 drop drop ;
+: drop3 drop2 drop ;
+: NL "\n" . ;
+: p . NL ;
+: show dup p ;
+: neg dup 2 * - ;
+: while
+  # Call the condition
+  dup2 swap call dip swap
+
+  # Call the body and re-arrange
+  [dip dup dip swap call
+   dip swap while]
+
+  # Get rid of the body & condition
+  [dip drop swap drop]
+
+  # Just read the result from calling
+  # the condition earlier
+  [] if
+;
+
+# Count down from 5
+[1 - show] [0 <] 5 while drop
+
+50 neg p
