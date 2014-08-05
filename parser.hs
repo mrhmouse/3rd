@@ -113,4 +113,6 @@ readString s = go (s, []) where
   go ([], vs) = ([], done vs)
   go ('"':s, vs) = (s, done vs)
   go ('\\':'"':s, vs) = go (s, "\"" ++ vs)
+  go ('\\':'n':s, vs) = go (s, "\n" ++ vs)
+  go ('\\':'t':s, vs) = go (s, "\t" ++ vs)
   go (c:s, vs) = go (s, c:vs)

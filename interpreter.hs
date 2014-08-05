@@ -37,6 +37,7 @@ runName e n stack = case n of
   ">" -> greaterThan stack
   "<" -> lessThan stack
   "!" -> inverse stack
+  "." -> printVal stack
   "call" -> runBlock e block rest where
     (Block block) = head stack
     rest = drop 1 stack
@@ -131,3 +132,17 @@ lessThan _ = underflow
 inverse (Bool a:stack) = return $ result:stack where result = Bool $ not a
 inverse (a:stack) = error $ "Expected a boolean, but got " ++ show a
 inverse _ = underflow
+
+printVal (v:rest) = do
+  putStr $ printValue v
+  return rest
+
+printValue :: Value -> String
+printValue v = case v of
+  Bool v -> show v
+  Int v -> show v
+  String v -> v
+  Float v -> show v
+  List v -> show $ map show v
+  Block v -> "#block" ++ (show $ map show v)
+  Name v -> "#ref<" ++ v ++ ">"
