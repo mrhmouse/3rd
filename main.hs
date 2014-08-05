@@ -2,6 +2,7 @@ module Main where
 import Interpreter
 import Parser
 import qualified Data.Map.Lazy as Map
+import Control.Monad
 
 execProgram :: String -> IO [Value]
 execProgram s = do
@@ -13,6 +14,7 @@ execProgram s = do
 main = do
   s <- getContents
   result <- execProgram s
-  putStr "\n"
-  putStr "Left on the stack: "
-  print result
+  if not (null result)
+  then do putStr "\nLeft on the stack: "
+          print result
+  else putStr ""
