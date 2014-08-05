@@ -128,10 +128,10 @@ conditional _ _ = underflow
 equals (a:b:stack) = return $ result:stack where result = Bool $ a == b
 equals _ = underflow
 
-greaterThan (a:b:stack) = return $ result:stack where result = Bool $ a > b
+greaterThan (a:b:stack) = return $ result:stack where result = Bool $ b > a
 greaterThan _ = underflow
 
-lessThan (a:b:stack) = return $ result:stack where result = Bool $ a < b
+lessThan (a:b:stack) = return $ result:stack where result = Bool $ b < a
 lessThan _ = underflow
 
 inverse (Bool a:stack) = return $ result:stack where result = Bool $ not a
@@ -159,7 +159,8 @@ pop (a:rest) = error $ "Expected list, but got " ++ show a
 pop _ = underflow
 
 cat (List a:List b:rest) = return $ (List $ a++b):rest
-cat (a:b:rest) = error $ "Expected two lists, but got " ++ show a ++ " and " ++ show b
+cat (String a:String b:rest) = return $ (String $ a++b):rest
+cat (a:b:rest) = error $ "Expected two lists or two strings, but got " ++ show a ++ " and " ++ show b
 cat _ = underflow
 
 push (a:List b:rest) = return $ (List $ a:b):rest
