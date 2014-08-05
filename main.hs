@@ -3,12 +3,14 @@ import Interpreter
 import Parser
 import qualified Data.Map.Lazy as Map
 
-execProgram :: String -> [Value]
-execProgram s = end where
-  (e', end) = interpret e stmts
-  e = Map.fromList []
-  stmts = readProgram s
+execProgram :: String -> IO [Value]
+execProgram s = do
+  let e = Map.fromList []
+  let stmts = readProgram s
+  (e', end) <- interpret e stmts
+  return end
 
 main = do
   s <- getContents
-  print $ execProgram s
+  result <- execProgram s
+  print result
