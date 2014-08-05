@@ -31,7 +31,6 @@
 : <iota> [drop] [dup dip swap push swap 1 - <iota>] [dup 0 =] if ;
 
 # Count down from 5
-(5 4 3 2 1) [. NL] each
+# (5 4 3 2 1) [. NL] each
 
-# Count up to 50
-50 iota ["Now we're at: " . . NL] each
+100000 iota [drop] each
