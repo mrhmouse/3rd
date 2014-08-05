@@ -41,6 +41,11 @@ runName e n stack = case n of
   "call" -> runBlock e block rest where
     (Block block) = head stack
     rest = drop 1 stack
+  "pop" -> pop stack
+  "push" -> push stack
+  "cat" -> cat stack
+  "empty" -> empty stack
+  "length" -> valLength stack
   s -> case Map.lookup s e of
     Nothing -> error $ "Undefined name: " ++ s
     Just v -> case v of
@@ -143,6 +148,28 @@ printValue v = case v of
   Int v -> show v
   String v -> v
   Float v -> show v
-  List v -> show $ map show v
-  Block v -> "#block" ++ (show $ map show v)
+  List v -> show $ map printValue v
+  Block v -> "#block" ++ (show $ map printValue v)
   Name v -> "#ref<" ++ v ++ ">"
+
+pop (List lst:rest) = return $ h:t:rest where
+  h = head lst
+  t = List $ tail lst
+pop (a:rest) = error $ "Expected list, but got " ++ show a
+pop _ = underflow
+
+cat (List a:List b:rest) = return $ (List $ a++b):rest
+cat (a:b:rest) = error $ "Expected two lists, but got " ++ show a ++ " and " ++ show b
+cat _ = underflow
+
+push (a:List b:rest) = return $ (List $ a:b):rest
+push (_:b:rest) = error $ "Expected a list, but got " ++ show b
+push _ = underflow
+
+empty (List a:rest) = return $ Bool (null a):rest
+empty (a:rest) = error $ "Expected a list, but got " ++ show a
+empty _ = underflow
+
+valLength (List a:rest) = return $ Int (fromIntegral $ length a):rest
+valLength (a:rest) = error $ "Expected a list, but got " ++ show a
+valLength _ = underflow

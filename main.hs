@@ -13,4 +13,6 @@ execProgram s = do
 main = do
   s <- getContents
   result <- execProgram s
+  putStr "\n"
+  putStr "Left on the stack: "
   print result
