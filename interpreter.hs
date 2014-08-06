@@ -24,16 +24,16 @@ runValue e v stack = case v of
 -- This is where builtin functions live.
 runName :: Env -> Name -> [Value] -> IO [Value]
 runName e n stack = case n of
-  "dup" -> dup stack
-  "drop" -> return $ drop 1 stack
-  "swap" -> swap stack
-  "rot" -> rot stack
-  "dip" -> dip stack
+  "yank" -> yank stack
+  "copy" -> copy stack
+  "delete" -> delete stack
+  "string" -> toString stack
   "+" -> add stack
   "-" -> sub stack
   "*" -> mul stack
   "/" -> divide stack
   "if" -> conditional e stack
+  "while" -> while e stack
   "=" -> equals stack
   ">" -> greaterThan stack
   "<" -> lessThan stack
@@ -55,6 +55,13 @@ runName e n stack = case n of
       Block b -> runBlock e b stack
       literal -> return $ literal:stack
 
+while e (Block cond:Block body:rest) = do
+  (Bool b:rest) <- runBlock e cond rest
+  if b
+  then do rest <- runBlock e body rest
+          while e (Block cond:Block body:rest)
+  else return rest
+
 runBlock :: Env -> [Value] -> [Value] -> IO [Value]
 runBlock e [] stack = return stack
 runBlock e (v:vs) stack = do
@@ -63,17 +70,31 @@ runBlock e (v:vs) stack = do
 
 underflow = error "Stack underflow!"
 
-dup [] = underflow
-dup (x:xs) = return $ x:x:xs
+copy [] = underflow
+copy (Int n':stack) = if n < len then return $ yanked:stack else underflow where
+  n = fromIntegral n'
+  len = length stack
+  yanked = stack !! n
+copy (a:_) = error $ "Expected integer, but got: " ++ show a
 
-swap (a:b:xs) = return $ b:a:xs
-swap _ = underflow
+yank [] = underflow
+yank (Int n':stack) = if n < len then return $ yanked:rest else underflow where
+  n = fromIntegral n'
+  len = length stack
+  yanked = stack !! n
+  rest = stack `except` n
+yank (a:_) = error $ "Expected integer, but got: " ++ show a
 
-rot (a:b:c:xs) = return $ b:c:a:xs
-rot _ = underflow
+delete [] = underflow
+delete (Int n':stack) = if n < len then return $ rest else underflow where
+  n = fromIntegral n'
+  len = length stack
+  rest = stack `except` n
+delete (a:_) = error $ "Expected integer, but got: " ++ show a
 
-dip (a:b:c:xs) = return $ c:a:b:xs
-dip _ = underflow
+toString [] = underflow
+toString (a:rest) = return $ str:rest where
+  str = String $ printValue a
 
 add (a:b:xs) = return $ s:xs where
   s = case (a, b) of

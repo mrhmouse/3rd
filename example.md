@@ -20,13 +20,12 @@ Bultin functions
 Stack manipulation
 ==================
 
-- dup : duplicate top item on the stack
-- drop : drop the top item from the stack
-- swap : swap the top two items on the stack
-- rot : rotate the top three items on the stack
-    a b c --> b c a
-- dip : bring the third item in the stack forward
-    a b c --> c b a
+- yank    : pull an item to the front
+    a b c 1 yank --> a c b
+- copy    : pull a copy of an item to the front
+    a b c 1 copy --> a b c b
+- delete  : remove an item from the stack
+    a b c 1 delete --> a c
 
 Math
 ====
@@ -46,7 +45,7 @@ Logic
 - if : the conditional statement
     [ "yep" ] [ "nope" ] [ 1 1 = ] if --> "yep"
 - while : the loop
-    50 [1 - dup .] [dup 0 >] while --> Print from 49 down to 0 # TODO; is a library function, needs to be a builtin
+    50 [1 - 0 copy .] [0 copy 0 >] while --> Print from 49 down to 0
 - =  : compare the top two items for equality
     1 1 = --> true
 - >  : compare the top two items
