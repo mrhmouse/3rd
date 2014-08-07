@@ -1,0 +1,44 @@
+# Stack manipulation.
+: swap 1 yank ;
+: dip 2 yank ;
+: rot dip dip ;
+: dup 0 copy ;
+
+# Control flow.
+: when [] swap if ;
+: or [] swap [] if ;
+: times swap 0 [dup 2 copy call 1 +] [dup 3 copy <] while drop drop drop ;
+
+# Printing.
+: nl "\n" . ;
+: p . nl ;
+
+# Math.
+: neg dup 2 * - ;
+: zero 0 = ;
+: square dup * ;
+
+# Lists.
+: iota () swap <iota> drop;
+: <iota>
+  [] [1 - dup dip swap push swap <iota>]
+  [dup 0 < [dup zero] or]
+  if ;
+: each swap <each> ;
+: <each> [drop drop] [pop 2 copy call <each>] [dup empty] if ;
+: unroll [pop swap] [dup empty !] while drop ;
+: collect () [2 yank push] [swap 1 - dup 0 < ! dip swap] while swap drop ;
+: fold
+  swap
+  [pop swap pop dip 3 copy call push]
+  [dup length 1 >]
+  while
+  swap drop pop swap drop
+;
+: push2 dup 2 yank swap push swap push ;
+
+# [square p] 100000 times
+
+# 10 iota [p] each
+
+() 0 push2 [+] fold
