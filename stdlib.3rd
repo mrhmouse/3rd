@@ -37,7 +37,3 @@
   swap drop pop swap drop
 ;
 : push2 dup 2 yank swap push swap push ;
-
-# [square p] 100000 times
-
-10 iota [p] each
