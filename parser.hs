@@ -16,6 +16,7 @@ data Value
 data Statement
   = Value Value
   | Definition Name Value
+  | Import String
   deriving Show
 
 whitespace :: Char -> Bool
@@ -33,10 +34,20 @@ digit c = c `elem` ['0'..'9']
 readProgram :: String -> [Statement]
 readProgram s = go (s, []) where
   go ([], vs) = reverse vs
+  go (':':':':s, vs) = let (r, v) = readImport s in go (r, v:vs)
   go (':':s, vs) = let (r, v) = readDefinition s in go (r, v:vs)
   go (s, vs) = case readValue s of
     (r, Nothing) -> go (r, vs)
     (r, Just v)  -> go (r, Value v:vs)
+
+readImport :: String -> (String, Statement)
+readImport s = (rest, Import name) where
+  (rest', String name) = case dropWhile whitespace s of
+    '"':s' -> readString s'
+    c:_    -> error $ "Expected a quote,, but got " ++ show c
+  rest = case dropWhile whitespace rest' of
+    ';':r -> r
+    _     -> error "Unterminated import! Expected ';'"
 
 readDefinition :: String -> (String, Statement)
 readDefinition s = go (s', []) where

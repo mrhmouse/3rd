@@ -12,9 +12,24 @@ interpret e stmts = i e stmts [] where
   i e [] stack = return (e, reverse stack)
   i e (s:rest) stack = case s of
     Definition n v -> i (Map.insert n v e) rest stack
-    Value v        -> do
-      result <- runValue e v stack
-      i e rest result
+    Value v        -> do result <- runValue e v stack
+                         i e rest result
+    Import n       -> do source <- readFile n
+                         e' <- evalProgram e source
+                         i e' rest stack
+
+evalProgram :: Env -> String -> IO Env
+evalProgram e s = do
+  let stmts = readProgram s
+  (e', _) <- interpret e stmts
+  return e'
+
+execProgram :: String -> IO [Value]
+execProgram s = do
+  let e = Map.fromList []
+  let stmts = readProgram s
+  (e', end) <- interpret e stmts
+  return end
 
 runValue :: Env -> Value -> [Value] -> IO [Value]
 runValue e v stack = case v of
