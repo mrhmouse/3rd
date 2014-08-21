@@ -10,4 +10,3 @@ TODO NOTES
     - length
   - IO
   - Control flow
-- Implement module loading at runtime
