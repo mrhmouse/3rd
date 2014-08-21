@@ -39,7 +39,7 @@ runValue e v stack = case v of
 -- This is where builtin functions live.
 runName :: Env -> Name -> [Value] -> IO [Value]
 runName e n stack = case n of
-  "reify" -> reify e stack
+  "eval" -> eval e stack
   "yank" -> yank stack
   "copy" -> copy stack
   "delete" -> delete stack
@@ -266,10 +266,10 @@ insert (Int _:_:a:_) = error $ "Expected list type, but got: " ++ show a
 insert (a:_:_:_) = error $ "Expected integer, but got: " ++ show a
 insert _ = underflow
 
-reify e (String str:rest) = do
+eval e (String str:rest) = do
   let parsed = readProgram str
   (_, stack) <- interpret e parsed
   return stack
 
-reify _ (a:_) = error $ "Expected a string, but got: " ++ show a
-reify _ _ = underflow
+eval _ (a:_) = error $ "Expected a string, but got: " ++ show a
+eval _ _ = underflow
