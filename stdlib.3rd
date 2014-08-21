@@ -3,6 +3,7 @@
 : dip 2 yank ;
 : rot dip dip ;
 : dup 0 copy ;
+: drop 0 delete ;
 
 # Control flow.
 : when [] swap if ;
@@ -39,6 +40,4 @@
 
 # [square p] 100000 times
 
-# 10 iota [p] each
-
-() 0 push2 [+] fold
+10 iota [p] each
