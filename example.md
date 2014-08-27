@@ -116,4 +116,4 @@ Conversion functions
 
 - convert an item to a string
 
-        4.5 string --> "4.5" # TODO
+        4.5 string --> "4.5"
